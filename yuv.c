@@ -7,8 +7,8 @@
 /*
 	uyvy422, packed format
 
-	Byte 3			Byte 2			Byte 1 			Byte 0
-	Y1				V0 				Y0 				U0
+	Byte3           Byte2           Byte1           Byte0
+	Y1              V0              Y0              U0
 	7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0 7 6 5 4 3 2 1 0
 */
 
