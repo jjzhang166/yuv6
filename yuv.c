@@ -27,19 +27,20 @@
 */
 
 void uyvy422_to_i420(const char *src, char *dst, unsigned int w, unsigned int h) {
-	unsigned int i, point_y;
 	char *dst_y = dst;
 	char *dst_u = dst_y + w * h;
 	char *dst_v = dst_u + w * h / 4;
+	int count = w * h / 2; 
+	int i, idx;
 
-	for (i = 0; i < w * h / 2; i++) {
-		*dst_y++ = src[i*4 + 1];
-		*dst_y++ = src[i*4 + 3];
+	for (i = 0; i < count; i++) {
+		idx = i * 4;
+		*dst_y++ = src[idx + 1];
+		*dst_y++ = src[idx + 3];
 
-		point_y = (unsigned int) (dst_y - dst);
-		if ((point_y / w) % 2 == 0)
-			*dst_u++ = src[i*4];
+		if ((((unsigned int) (dst_y - dst) / w) & 0x01) == 0)
+			*dst_u++ = src[idx];
 		else
-			*dst_v++ = src[i*4 + 2];
+			*dst_v++ = src[idx + 2];
 	}
 }

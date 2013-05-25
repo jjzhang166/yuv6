@@ -11,7 +11,7 @@ OBJS=$(SRCS:.c=.o)
 EXE=yuv.exe
 LIBS=yuv.a
 
-all: $(LIBS)
+all: $(EXE)
 
 $(EXE): $(LIBS)
 	$(CC) $(CFLAGS) -o $@ $^
