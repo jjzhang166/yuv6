@@ -30,17 +30,43 @@ void uyvy422_to_i420(const char *src, char *dst, unsigned int w, unsigned int h)
 	char *dst_y = dst;
 	char *dst_u = dst_y + w * h;
 	char *dst_v = dst_u + w * h / 4;
-	int count = w * h / 2; 
-	int i, idx;
+	unsigned int i, offset, line_end = w >> 1, line = 0;
+	unsigned char even = 1;
 
-	for (i = 0; i < count; i++) {
-		idx = i * 4;
-		*dst_y++ = src[idx + 1];
-		*dst_y++ = src[idx + 3];
+	for (i = 0; i < w * h / 2; i++) {
+		offset = i << 2;
+		*dst_y++ = src[offset + 1];
+		*dst_y++ = src[offset + 3];
 
-		if ((((unsigned int) (dst_y - dst) / w) & 0x01) == 0)
-			*dst_u++ = src[idx];
+		if (i == (line + 1) * line_end) {
+			line++;
+			even = !even;
+		}
+		if (even)
+			*dst_u++ = src[offset];
 		else
-			*dst_v++ = src[idx + 2];
+			*dst_v++ = src[offset + 2];
+	}
+}
+
+void uyvy422_to_i420_plus(const char *src, char *dst, unsigned int w, unsigned int h) {
+	char *dst_y = dst;
+	char *dst_u = dst_y + w * h;
+	char *dst_v = dst_u + w * h / 4;
+	unsigned int i, j, offset;
+
+	for (i = 0; i < h; i++) {
+		for (j = 0; j < w; j++) {
+			offset = (j + i * w) << 1;
+			*dst_y++ = src[offset + 1];
+
+			if ((i & 0x01) == 0) {
+				if ((j & 0x01) == 0)
+					*dst_u++ = src[offset];
+			} else {
+				if ((j & 0x01) == 0)
+					*dst_v++ = src[offset];
+			}
+		}
 	}
 }
