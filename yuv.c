@@ -65,7 +65,7 @@ void uyvy422_to_i420(const char *src, char *dst, unsigned int w, unsigned int h)
 				if ((j & 0x01) == 0)
 					*dst_u++ = src[offset];
 			} else {
-				if ((j & 0x01) == 0)
+				if ((j & 0x01) == 1)
 					*dst_v++ = src[offset];
 			}
 		}
