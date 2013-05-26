@@ -44,13 +44,13 @@ static void _write(char *buffer, unsigned int w, unsigned int h, char *filepath)
 }
 
 static double _test(int count, 
-					char *src, 
-					char *dst, 
-					unsigned int w, 
-					unsigned int h,
-					char *inpath,
-					char *outpath,
-					void (*convert)(const char *, char *, unsigned int, unsigned int)) {
+				char *src, 
+				char *dst, 
+				unsigned int w, 
+				unsigned int h,
+				char *inpath,
+				char *outpath,
+				void (*convert)(const char *, char *, unsigned int, unsigned int)) {
 	struct timeval start, end;
 
 	_read(src, w, h, inpath);
@@ -61,7 +61,6 @@ static double _test(int count,
 	gettimeofday(&end, NULL);
 
 	_write(dst, w, h, outpath);
-
 	return (1000000 * (end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec) / 1000;
 }
 
@@ -77,7 +76,7 @@ int main(int argc, char **argv) {
 	elapsed = _test(count, src, dst, w, h, filepath, "i420.yuv", uyvy422_to_i420);
 	printf("elapsed=%fms, avg=%fms\n", elapsed, elapsed / count);
 
-	elapsed = _test(count, src, dst, w, h, filepath, "i420_p.yuv", uyvy422_to_i420_plus);
+	elapsed = _test(count, src, dst, w, h, filepath, "i420_old.yuv", uyvy422_to_i420_old);
 	printf("elapsed=%fms, avg=%fms\n", elapsed, elapsed / count);
 
 	free(src);

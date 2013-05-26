@@ -7,7 +7,7 @@ extern "C"
 #endif
 
 void uyvy422_to_i420(const char *src, char *dst, unsigned int w, unsigned int h);
-void uyvy422_to_i420_plus(const char *src, char *dst, unsigned int w, unsigned int h);
+void uyvy422_to_i420_old(const char *src, char *dst, unsigned int w, unsigned int h);
 
 #ifdef __cplusplus
 }

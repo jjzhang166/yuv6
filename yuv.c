@@ -26,7 +26,7 @@
 	V(3,04) V(3,05) V(3,06) V(3,07)	V(5,08) V(5,09) V(5,10) V(5,11)
 */
 
-void uyvy422_to_i420(const char *src, char *dst, unsigned int w, unsigned int h) {
+void uyvy422_to_i420_old(const char *src, char *dst, unsigned int w, unsigned int h) {
 	char *dst_y = dst;
 	char *dst_u = dst_y + w * h;
 	char *dst_v = dst_u + w * h / 4;
@@ -49,15 +49,16 @@ void uyvy422_to_i420(const char *src, char *dst, unsigned int w, unsigned int h)
 	}
 }
 
-void uyvy422_to_i420_plus(const char *src, char *dst, unsigned int w, unsigned int h) {
+void uyvy422_to_i420(const char *src, char *dst, unsigned int w, unsigned int h) {
 	char *dst_y = dst;
 	char *dst_u = dst_y + w * h;
 	char *dst_v = dst_u + w * h / 4;
-	unsigned int i, j, offset;
+	unsigned int i, j, offset, hoffset;
 
 	for (i = 0; i < h; i++) {
+		hoffset = i * w;
 		for (j = 0; j < w; j++) {
-			offset = (j + i * w) << 1;
+			offset = (j + hoffset) << 1;
 			*dst_y++ = src[offset + 1];
 
 			if ((i & 0x01) == 0) {
