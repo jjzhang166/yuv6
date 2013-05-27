@@ -19,4 +19,7 @@ def getFileCRC(_path):
 	return crc
 
 if __name__ == "__main__":
-	print "crc32=0x%x" % getFileCRC(sys.argv[1])
+	a = getFileCRC(sys.argv[1])
+	b = getFileCRC(sys.argv[2])
+	print "crc32(%s)=0x%08x" % (sys.argv[1], a)
+	print "crc32(%s)=0x%08x" % (sys.argv[2], b)
