@@ -1,0 +1,1 @@
+cl /O2 test.c yuv.c /DWIN32_CL
