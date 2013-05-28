@@ -1,7 +1,8 @@
 #!/usr/bin/python
 
-import sys
+import os
 import binascii
+import sys
 
 def getFileCRC(_path):
 	try:
@@ -19,7 +20,8 @@ def getFileCRC(_path):
 	return crc
 
 if __name__ == "__main__":
-	a = getFileCRC(sys.argv[1])
-	b = getFileCRC(sys.argv[2])
-	print "crc32(%s)=0x%08x" % (sys.argv[1], a)
-	print "crc32(%s)=0x%08x" % (sys.argv[2], b)
+	for r,d,f in os.walk("./"):
+		for files in f:
+			if files.endswith(".yuv"):
+				a = getFileCRC(files)
+				print "crc32(%s)=0x%08x" % (os.path.join(r, files), a)
