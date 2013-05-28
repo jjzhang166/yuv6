@@ -26,7 +26,10 @@
 	V(3,04) V(3,05) V(3,06) V(3,07)	V(5,08) V(5,09) V(5,10) V(5,11)
 */
 
-void uyvy422_to_i420_old(const char *src, char *dst, unsigned int w, unsigned int h) {
+/*
+ * 4 bytes loop way
+ */
+void uyvy422_to_i420_4byte(const char *src, char *dst, unsigned int w, unsigned int h) {
 	char *dst_y = dst;
 	char *dst_u = dst_y + w * h;
 	char *dst_v = dst_u + w * h / 4;
@@ -49,7 +52,10 @@ void uyvy422_to_i420_old(const char *src, char *dst, unsigned int w, unsigned in
 	}
 }
 
-void uyvy422_to_i420(const char *src, char *dst, unsigned int w, unsigned int h) {
+/*
+ * w and h loop way
+ */
+void uyvy422_to_i420_wh(const char *src, char *dst, unsigned int w, unsigned int h) {
 	char *dst_y = dst;
 	char *dst_u = dst_y + w * h;
 	char *dst_v = dst_u + w * h / 4;

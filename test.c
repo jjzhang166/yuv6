@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifdef WIN32_CL
+#include <windows.h>
+#else
 #include <sys/time.h>
+#endif
 
 #include "yuv.h"
 
@@ -51,17 +56,36 @@ static double _test(int count,
 				char *inpath,
 				char *outpath,
 				void (*convert)(const char *, char *, unsigned int, unsigned int)) {
+
+#ifdef WIN32_CL
+	unsigned long long start, end;
+#else
 	struct timeval start, end;
+#endif
 
 	_read(src, w, h, inpath);
 
+#ifdef WIN32_CL
+	start = GetTickCount64();
+#else
 	gettimeofday(&start, NULL);
+#endif
+
 	while (count-- > 0)
 		convert(src, dst, w, h);
+
+#ifdef WIN32_CL
+	end = GetTickCount64();
+#else	
 	gettimeofday(&end, NULL);
+#endif
 
 	_write(dst, w, h, outpath);
+#ifdef WIN32_CL
+	return (end - start) * 1.0f;
+#else
 	return (1000000 * (end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec) / 1000;
+#endif
 }
 
 int main(int argc, char **argv) {
@@ -72,12 +96,12 @@ int main(int argc, char **argv) {
 	char *src = malloc(uyvy_size(w, h));
 	char *dst = malloc(i420_size(w, h));
 	double elapsed;
-	
-	elapsed = _test(count, src, dst, w, h, filepath, "i420.yuv", uyvy422_to_i420);
-	printf("elapsed=%fms, avg=%fms\n", elapsed, elapsed / count);
 
-	elapsed = _test(count, src, dst, w, h, filepath, "i420_old.yuv", uyvy422_to_i420_old);
-	printf("elapsed=%fms, avg=%fms\n", elapsed, elapsed / count);
+	elapsed = _test(count, src, dst, w, h, filepath, "i420_4b.yuv", uyvy422_to_i420_4byte);
+	printf("4b> elapsed=%fms, avg=%fms\n", elapsed, elapsed / count);
+
+	elapsed = _test(count, src, dst, w, h, filepath, "i420_wh.yuv", uyvy422_to_i420_wh);
+	printf("wh> elapsed=%fms, avg=%fms\n", elapsed, elapsed / count);
 
 	free(src);
 	free(dst);

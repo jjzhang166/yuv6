@@ -26,5 +26,6 @@ $(LIBS): $(OBJS)
 clean:
 	-$(DEL) *.a
 	-$(DEL) *.o
+	-$(DEL) *.exe
 
 rebuild: clean all
