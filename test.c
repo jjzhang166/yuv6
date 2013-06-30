@@ -121,6 +121,40 @@ static int _get_yuv_format(enum yuv_format *format, char *argv, unsigned int w, 
 	return 0;		
 }
 
+static void _dp_i420(char *src, unsigned int w, unsigned int h) {
+	char *src_y = (char *) src;
+	char *src_u = src_y + w * h;
+	char *src_v = src_u + w * h / 4;
+	unsigned int i;
+
+	printf("\nY\n");
+	for (i = 0; i < w * h; i++) {
+		printf("%02x ", src_y[i]);
+	}
+	printf("\nU\n");
+	for (i = 0; i < w * h / 4; i++) {
+		printf("%02x ", src_u[i]);
+	}
+	printf("\nV\n");
+	for (i = 0; i < w * h / 4; i++) {
+		printf("%02x ", src_v[i]);
+	}
+	printf("\n");
+
+}
+
+static void _dp_uyvy(char *src, unsigned int w, unsigned int h) {
+	unsigned int i, j;
+	
+	for (i = 0; i < h; i++) {
+		for (j = 0; j < w; j++) {
+			printf(" (%02x,  ", *src++);
+			printf(" %02x) ", *src++);
+		}
+		printf("\n");
+	}
+}
+
 int main(int argc, char **argv) {
 	unsigned int w = (unsigned int) atoi(argv[1]);
 	unsigned int h = (unsigned int) atoi(argv[2]);
@@ -133,24 +167,29 @@ int main(int argc, char **argv) {
 
 	if (_get_yuv_format(&src_format, argv[5], w, h, &src))
 		return -1;
-	printf("%d\n", argc);
 	if (_get_yuv_format(&dst_format, argv[6], w, h, &dst))
 		return -1;
 
 	if (src_format == yuv_uyvy) {
 		elapsed = _test(count, src_format, src, dst_format, dst, w, h, filepath, "i420_4b.yuv", uyvy422_to_i420_4byte);
-		printf("4b> elapsed=%fms, avg=%fms\n", elapsed, elapsed / count);
+		printf("uyvy_to_i420_4b> elapsed=%fms, avg=%fms\n", elapsed, elapsed / count);
 
 		elapsed = _test(count, src_format, src, dst_format, dst, w, h, filepath, "i420_wh.yuv", uyvy422_to_i420_wh);
-		printf("wh> elapsed=%fms, avg=%fms\n", elapsed, elapsed / count);
+		printf("uyvy_to_i420_wh> elapsed=%fms, avg=%fms\n", elapsed, elapsed / count);
 	} else if (src_format == yuv_i420) {
 		elapsed = _test(count, src_format, src, dst_format, dst, w, h, filepath, "uyvy422.yuv", i420_to_uyvy422);
-		printf("4b> elapsed=%fms, avg=%fms\n", elapsed, elapsed / count);
+		printf("i420_to_uyvy> elapsed=%fms, avg=%fms\n", elapsed, elapsed / count);
+
+		// _dp_i420(src, w, h);
+		// _dp_uyvy(dst, w, h);
 
 		elapsed = _test(count, src_format, src, dst_format, dst, w, h, filepath, "uyvy422_bottom.yuv", i420_to_uyvy422_bottom);
-		printf("wh> elapsed=%fms, avg=%fms\n", elapsed, elapsed / count);
-		if (count != 1)
-			printf("fread(%s)=%d failed\n", filepath, count);
+		printf("i420_to_uyvy_bottom> elapsed=%fms, avg=%fms\n", elapsed, elapsed / count);
+
+		// _dp_uyvy(dst, w, h);
+
+		elapsed = _test(count, src_format, src, dst_format, dst, w, h, filepath, "uyvy422_bottom_err.yuv", i420_to_uyvy422_err);
+		printf("i420_to_uyvy_err> elapsed=%fms, avg=%fms\n", elapsed, elapsed / count);
 	} else {
 		printf("fopen(%s) failed\n", filepath);
 		exit(0);

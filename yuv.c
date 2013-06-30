@@ -85,18 +85,25 @@ void i420_to_uyvy422(const char *src, char *dst, unsigned int w, unsigned int h)
 	char *dst_line0, *dst_line1;
 	unsigned int i, j;
 
-	for (i = 0; i > (h >> 1); i++) {
+	for (i = 0; i < (h >> 1); i++) {
 		dst_line0 = dst + (uyvy_size(w, i) << 1);
 		dst_line1 = dst_line0 + uyvy_size(w, 1);
-		for (j = 0; j < w; j++) {
-			if ((j >> 1) == 0)
-				*dst_line0++ = *dst_line1++ = *src_u++;
-			else
-				*dst_line0++ = *dst_line1++ = *src_v++;
+		for (j = 0; j < (w >> 1); j++) {
+			*dst_line0++ = *src_u;
 			*dst_line0++ = *src_y;
+			*dst_line0++ = *src_v;
+			*dst_line0++ = *(src_y + 1);
+
+			*dst_line1++ = *src_u;
 			*dst_line1++ = *(src_y + w);
-			src_y++;
+			*dst_line1++ = *src_v;
+			*dst_line1++ = *(src_y + w + 1);
+
+			src_u++;
+			src_v++;
+			src_y += 2;			
 		}
+		src_y += w;
 	}
 }
 
@@ -104,21 +111,50 @@ void i420_to_uyvy422_bottom(const char *src, char *dst, unsigned int w, unsigned
 	char *src_y = (char *) src;
 	char *src_u = src_y + w * h;
 	char *src_v = src_u + w * h / 4;
-	char *dst_line0, *dst_line1;
+	char *dst_line;
+	unsigned int i, j;
+
+	for (i = 0; i < h; i++) {
+		dst_line = dst + uyvy_size(w, h - i - 1);
+		for (j = 0; j < (w >> 1); j++) {
+			*dst_line++ = *src_u++;
+			*dst_line++ = *src_y++;
+			*dst_line++ = *src_v++;
+			*dst_line++ = *src_y++;
+		}
+
+		if ((i & 0x01) == 0) {
+			src_v -= w >> 1;
+			src_u -= w >> 1;
+		}
+	}
+}
+
+void i420_to_uyvy422_err(const char *src, char *dst, unsigned int w, unsigned int h) {
+	char *src_y = (char *) src;
+	char *src_u = src_y + w * h;
+	char *src_v = src_u + w * h / 4;
+	char *dst_line0;
 	char *dst_end = dst + uyvy_size(w, h);
 	unsigned int i, j;
 
-	for (i = 0; i > (h >> 1); i++) {
-		dst_line0 = dst_end - (uyvy_size(w, i+1) << 1);
-		dst_line1 = dst_line0 + uyvy_size(w, 1);
+	dst_line0 = dst;
+	for (i = 0; i < h; i++) {
+		dst_line0 = dst_end - uyvy_size(w, 1);
 		for (j = 0; j < w; j++) {
-			if ((j >> 1) == 0)
-				*dst_line0++ = *dst_line1++ = *src_u++;
-			else
-				*dst_line0++ = *dst_line1++ = *src_v++;
-			*dst_line0++ = *src_y;
-			*dst_line1++ = *(src_y + w);
-			src_y++;
+			if ((i & 0x01) == 0) {
+				if ((j & 0x01) == 0)
+					*dst_line0++ = *src_u++;
+				else
+					*dst_line0++ = *src_v;
+				*dst_line0++ = *src_y++;
+			} else {
+				if ((j & 0x01) == 0)
+					*dst_line0++ = *src_v++;
+				else
+					*dst_line0++ = *src_u;
+				*dst_line0++ = *src_y++;
+			}
 		}
 	}
 }
