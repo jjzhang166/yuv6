@@ -21,6 +21,7 @@ void i420_to_uyvy422(const char *src, char *dst, unsigned int w, unsigned int h)
 void i420_to_uyvy422_bottom(const char *src, char *dst, unsigned int w, unsigned int h);
 
 void i420_to_uyvy422_err(const char *src, char *dst, unsigned int w, unsigned int h);
+void i420_scale(const char *src, char *dst, unsigned int w, unsigned int h, float scale);
 
 #ifdef __cplusplus
 }

@@ -158,3 +158,28 @@ void i420_to_uyvy422_err(const char *src, char *dst, unsigned int w, unsigned in
 		}
 	}
 }
+
+void i420_scale(const char *src, char *dst, unsigned int w, unsigned int h, float scale) {
+    char *src_y, *src_u, *src_v;
+    char *dst_y = dst;
+    char *dst_u = dst + w * h;
+    char *dst_v = dst + ((5 * w * h) >> 2);
+
+    unsigned int i, j;
+    unsigned int scale_int = (unsigned int) (1 / scale);
+    unsigned int dst_w = w / scale_int;
+    unsigned int dst_h = h / scale_int;
+
+    for (i = 0; i < dst_w; i++) {
+        src_y = (char *) src + (i * scale_int) * w;
+        src_u = (char *) src + w * h + ((i * scale_int) >> 1) * (w >> 1);
+        src_v = (char *) src + ((5 * w * h) >> 2) + ((i * scale_int) >> 1) * (w >> 1);
+
+        for (j = 0; j < (dst_h >> 1); j++) {
+            *dst_u++ = *src_u++;
+            *dst_y++ = *src_y++;
+            *dst_v++ = *src_v++;
+            *dst_y++ = *src_y++;
+        }
+    }
+}
