@@ -184,40 +184,36 @@ void i420_scale(const char *src, char *dst, unsigned int w, unsigned int h, floa
     }
 }
 
-static void _i420_point(const char *src, 
-					unsigned int w, 
-					unsigned int h, 
-					unsigned int x, 
-					unsigned int y, 
-					char *dst_y,
-					char *dst_u,
-					char *dst_v) {	
-	*dst_y = src[y * w + x];
-
-	if ((y & 0x01) == 0) {
-		if ((x & 0x01) == 0)
-			*dst_u = src[w * h + ((y * w) >> 1) + (x << 1)];
-		else
-			*dst_v = src[((5 * w * h) >> 2) + (((y+1) * w) >> 1) + (x << 1)];
-	} else {
-		if ((x & 0x01) == 0)
-			*dst_u = src[w * h + (((y-1) * w) >> 1) + (x << 1)];
-		else
-			*dst_v = src[((5 * w * h) >> 2) + ((y * w) >> 1) + (x << 1)];
-	}
+__inline static void _i420_to_yuyv422_half_pix(const char *src, 
+										char *dst,
+										unsigned int w, 
+										unsigned int h, 
+										unsigned int i, 
+										unsigned int j,
+										unsigned int src_u_off,
+										unsigned int src_v_off) {	
+	dst[0] = src[i * w + (j << 2)];
+	if ((i & 0x01) == 0)
+		dst[1] = src[src_u_off + ((i * w) >> 2) + (j << 1)];
+	else
+		dst[1] = src[src_u_off + (((i-1) * w) >> 2) + (j << 1)];
+	dst[2] = src[i * w + (j << 2) + 3];
+	dst[3] = src[src_v_off + ((i * w) >> 2) + (j << 1) + 1];
 }
 
-void i420_3d_to_yuyv422_sbs(const char *src_left, const char *src_right, char *dst, unsigned int w, unsigned int h) {
+void i420_3d_to_yuyv422_sbs(const char *src_left, 
+							const char *src_right, 
+							char *dst, 
+							unsigned int w, 
+							unsigned int h) {
 	unsigned int i, j;
-	int src_u_offset = w * h;
-	int src_v_offset = (5 * w * h) >> 2;
+	unsigned int src_u_off = w * h;
+	unsigned int src_v_off = (5 * w * h) >> 2;
 
 	for (i = 0; i < h; i++) {
-		for (j = 0; j < w; j++) {
-			// left
-			*dst++ = src_left[i * w + j];
-			if ((j & 0x01) == 0)
-				*dst++ = src_left[src_u_offset + ((i * w) >> 1) + (j << 1)];
+		for (j = 0; j < (w >> 2); j++) {
+			_i420_to_yuyv422_half_pix(src_left, dst + i * j, w, h, i, j, src_u_off, src_v_off);	
+			_i420_to_yuyv422_half_pix(src_right, dst + i * j + 4, w, h, i, j, src_u_off, src_v_off);		
 		}
 	}
 }
