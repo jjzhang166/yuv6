@@ -10,6 +10,28 @@
 
 #include "yuv.h"
 
+#ifdef WIN32_CL
+#define time_now    unsigned long long
+#else
+#define time_now    struct timeval
+#endif
+
+static void _get_time_now(time_now *now) {
+#ifdef WIN32_CL
+    *now = GetTickCount64();
+#else
+    gettimeofday(now, NULL);
+#endif
+}
+
+static double _get_time_now_diff(time_now *start, time_now *end) {
+#ifdef WIN32_CL
+    return (*end - *start) * 1.0f;
+#else
+    return (1000000 * (end->tv_sec - start->tv_sec) + end->tv_usec - start->tv_usec) / 1000;
+#endif
+}
+
 static void _read(enum yuv_format format,
                   char *buffer,
                   unsigned int w,
@@ -129,38 +151,60 @@ static double _test(int count,
                     char *outpath,
                     void (*convert)(const char *, char *, unsigned int, unsigned int))
 {
-#ifdef WIN32_CL
-    unsigned long long start, end;
-#else
-    struct timeval start, end;
-#endif
+    double elapsed = 0.0f;
+    time_now start, end;
 
     _read(sf, src, w, h, inpath);
 
-#ifdef WIN32_CL
-    start = GetTickCount64();
-#else
-    gettimeofday(&start, NULL);
-#endif
-
-    while (count-- > 0)
+    while (count-- > 0) {
+        _get_time_now(&start);
         convert(src, dst, w, h);
+        _get_time_now(&end);
 
-#ifdef WIN32_CL
-    end = GetTickCount64();
-#else
-    gettimeofday(&end, NULL);
-#endif
+        elapsed += _get_time_now_diff(&start, &end);
+    }
 
-    _write(df, dst, w, h, outpath);
-#ifdef WIN32_CL
-    return (end - start) * 1.0f;
-#else
-    return (1000000 * (end.tv_sec - start.tv_sec) + end.tv_usec - start.tv_usec) / 1000;
-#endif
+    _write(df, dst, w, h, outpath);    
+    return elapsed;
 }
 
-static int _test_3d(int count,
+__inline static void _i420_3d_to_yuyv422_sbs(const char *src_left,
+                            const char *src_right,
+                            char *dst,
+                            unsigned int w,
+                            unsigned int h)
+{
+    unsigned int x, y, y_off, u_off, v_off;
+    unsigned int w_4 = w >> 2;
+    unsigned int pads[2];    
+    char *line;
+
+    for (y = 0; y < h; y++) {
+        line = dst + uyvy_size(w, y);
+        for (x = 0; x < w_4; x++) {
+            pads[0] = y * w_4 + (x << 1);
+            pads[1] = pads[0] - w_4;
+
+            y_off = y * w + (x << 2);
+            u_off = w * h + pads[y & 0x01];
+            v_off = 5 * w_4 * h + pads[y & 0x01] + 1;
+
+            line[0] = src_left[y_off];
+            line[1] = src_left[u_off];
+            line[2] = src_left[y_off + 3];
+            line[3] = src_left[v_off];
+
+            line[w] = src_right[y_off];
+            line[w + 1] = src_right[u_off];
+            line[w + 2] = src_right[y_off + 3];
+            line[w + 3] = src_right[v_off];
+
+            line += 4;
+        }
+    }
+}
+
+static double _test_3d(int count,
                     enum yuv_format sf,
                     char *src,
                     enum yuv_format df,
@@ -169,12 +213,21 @@ static int _test_3d(int count,
                     unsigned int h,
                     char *inpath,
                     char *outpath) {
+    double elapsed = 0.0f;
+    time_now start, end;
+    
     _read(sf, src, w, h, inpath);
+    
+    while (count-- > 0) {
+        _get_time_now(&start);
+        i420_3d_to_yuyv422_sbs(src, src, dst, w, h);
+        _get_time_now(&end);
 
-    i420_3d_to_yuyv422_sbs(src, src, dst, w, h);
+        elapsed += _get_time_now_diff(&start, &end);
+    }
 
     _write(df, dst, w, h, outpath);    
-    return 0;
+    return elapsed;
 }
 
 int main(int argc, char **argv)
@@ -191,11 +244,12 @@ int main(int argc, char **argv)
     if (_get_yuv_format(&sf, argv[5], w, h, &src))
         return -1;
     if (_get_yuv_format(&df, argv[6], w, h, &dst))
-        return -1;
+        return -1;    
 
-    if (argc >= 8) {
-        if (atoi(argv[7])) {
-            _test_3d(count, sf, src, df, dst, w, h, filepath, "yuyv422_sbs.yuv");
+    if (argc >= 8) {        
+        if (atoi(argv[7])) {            
+            elapsed = _test_3d(count, sf, src, df, dst, w, h, filepath, "yuyv422_sbs.yuv");
+            printf("i420_3d_to_yuyv422_sbs> elapsed=%fms, avg=%fms\n", elapsed, elapsed / count);
             goto exit;
         }
     }

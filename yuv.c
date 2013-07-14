@@ -190,48 +190,37 @@ void i420_scale(const char *src, char *dst, unsigned int w, unsigned int h, floa
     }
 }
 
-__inline static void _i420_to_yuyv422_half(const char *src,
-								        unsigned int u_off,
-								        unsigned int v_off,
-								        char *dst,
-								        unsigned int w,
-								        unsigned int h,
-								        unsigned int x,
-								        unsigned int y)
-{
-	unsigned int pads[2] = {((y * w) >> 2) + (x << 1), (((y - 1) * w) >> 2) + (x << 1)};
-
-	/* Y0 */
-    dst[0] = src[y * w + (x << 2)];
-    /* Y1 */
-    dst[2] = src[y * w + (x << 2) + 3];
-
-	/* U0 V0 */
-    if ((y & 0x01) == 0) {
-        dst[1] = src[u_off + pads[0]];
-        dst[3] = src[v_off + pads[0] + 1];
-    } else {
-        dst[1] = src[u_off + pads[1]];
-        dst[3] = src[v_off + pads[1] + 1];
-    }    
-}
-
 void i420_3d_to_yuyv422_sbs(const char *src_left,
                             const char *src_right,
                             char *dst,
                             unsigned int w,
                             unsigned int h)
 {
-    unsigned int x, y;
-    unsigned int u_off = w * h;
-    unsigned int v_off = (5 * w * h) >> 2;
+    unsigned int x, y, y_off, u_off, v_off;
+    unsigned int w_4 = w >> 2;
+    unsigned int pads[2];    
     char *line;
 
     for (y = 0; y < h; y++) {
         line = dst + uyvy_size(w, y);
-        for (x = 0; x < (w >> 2); x++) {
-            _i420_to_yuyv422_half(src_left, u_off, v_off, line, w, h, x, y);
-            _i420_to_yuyv422_half(src_right, u_off, v_off, line + w, w, h, x, y);
+        for (x = 0; x < w_4; x++) {
+            pads[0] = y * w_4 + (x << 1);
+            pads[1] = pads[0] - w_4;
+
+            y_off = y * w + (x << 2);
+            u_off = w * h + pads[y & 0x01];
+            v_off = 5 * w_4 * h + pads[y & 0x01] + 1;
+
+            line[0] = src_left[y_off];
+            line[1] = src_left[u_off];
+            line[2] = src_left[y_off + 3];
+            line[3] = src_left[v_off];
+
+            line[w] = src_right[y_off];
+            line[w + 1] = src_right[u_off];
+            line[w + 2] = src_right[y_off + 3];
+            line[w + 3] = src_right[v_off];
+
             line += 4;
         }
     }

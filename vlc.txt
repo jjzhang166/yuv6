@@ -1,9 +1,11 @@
 :demux=rawvideo :rawvid-width=1920 :rawvid-height=1080 :rawvid-chroma=UYVY :rawvid-fps=1
 
+:demux=rawvideo :rawvid-width=1920 :rawvid-height=1080 :rawvid-chroma=YUYV :rawvid-fps=1
+
 :demux=rawvideo :rawvid-width=1920 :rawvid-height=1080 :rawvid-chroma=I420 :rawvid-fps=1
 
 :demux=rawvideo :rawvid-width=176 :rawvid-height=144 :rawvid-chroma=I420 :rawvid-fps=1
 
-:demux=rawvideo :rawvid-width=176 :rawvid-height=144 :rawvid-chroma=UYVY :rawvid-fps=1
+:demux=rawvideo :rawvid-width=176 :rawvid-height=144 :rawvid-chroma=YUYV :rawvid-fps=1
 
 :demux=rawvideo :rawvid-width=4928 :rawvid-height=3864 :rawvid-chroma=I420 :rawvid-fps=1
