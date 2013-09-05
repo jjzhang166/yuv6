@@ -32,11 +32,12 @@ static double _get_time_now_diff(time_now *start, time_now *end) {
 #endif
 }
 
-static void _read(enum yuv_format format,
-                  char *buffer,
-                  unsigned int w,
-                  unsigned int h,
-                  char *filepath)
+static void
+_read(enum yuv_format format,
+        char *buffer,
+        unsigned int w,
+        unsigned int h,
+        char *filepath)
 {
     FILE *fd;
 
@@ -60,11 +61,12 @@ static void _read(enum yuv_format format,
     }
 }
 
-static void _write(enum yuv_format format,
-                   char *buffer,
-                   unsigned int w,
-                   unsigned int h,
-                   char *filepath)
+static void
+_write(enum yuv_format format,
+        char *buffer,
+        unsigned int w,
+        unsigned int h,
+        char *filepath)
 {
     FILE *fd;
 
@@ -88,7 +90,8 @@ static void _write(enum yuv_format format,
     }
 }
 
-static int _get_yuv_format(enum yuv_format *format, char *argv, unsigned int w, unsigned int h, char **buffer)
+static int 
+_get_yuv_format(enum yuv_format *format, char *argv, unsigned int w, unsigned int h, char **buffer)
 {
     if (strcmp("i420", argv) == 0) {
         *format = yuv_i420;
@@ -104,7 +107,8 @@ static int _get_yuv_format(enum yuv_format *format, char *argv, unsigned int w, 
     return 0;
 }
 
-static void _dp_i420(char *src, unsigned int w, unsigned int h)
+static void 
+_dp_i420(char *src, unsigned int w, unsigned int h)
 {
     char *src_y = (char *) src;
     char *src_u = src_y + w * h;
@@ -127,7 +131,8 @@ static void _dp_i420(char *src, unsigned int w, unsigned int h)
 
 }
 
-static void _dp_uyvy(char *src, unsigned int w, unsigned int h)
+static void 
+_dp_uyvy(char *src, unsigned int w, unsigned int h)
 {
     unsigned int i, j;
 
@@ -140,16 +145,17 @@ static void _dp_uyvy(char *src, unsigned int w, unsigned int h)
     }
 }
 
-static double _test(int count,
-                    enum yuv_format sf,
-                    char *src,
-                    enum yuv_format df,
-                    char *dst,
-                    unsigned int w,
-                    unsigned int h,
-                    char *inpath,
-                    char *outpath,
-                    void (*convert)(const char *, char *, unsigned int, unsigned int))
+static double 
+_test(int count,
+    enum yuv_format sf,
+    char *src,
+    enum yuv_format df,
+    char *dst,
+    unsigned int w,
+    unsigned int h,
+    char *inpath,
+    char *outpath,
+    void (*convert)(const char *, char *, unsigned int, unsigned int))
 {
     double elapsed = 0.0f;
     time_now start, end;
@@ -168,51 +174,16 @@ static double _test(int count,
     return elapsed;
 }
 
-__inline static void _i420_3d_to_yuyv422_sbs(const char *src_left,
-                            const char *src_right,
-                            char *dst,
-                            unsigned int w,
-                            unsigned int h)
-{
-    unsigned int x, y, y_off, u_off, v_off;
-    unsigned int w_4 = w >> 2;
-    unsigned int pads[2];    
-    char *line;
-
-    for (y = 0; y < h; y++) {
-        line = dst + uyvy_size(w, y);
-        for (x = 0; x < w_4; x++) {
-            pads[0] = y * w_4 + (x << 1);
-            pads[1] = pads[0] - w_4;
-
-            y_off = y * w + (x << 2);
-            u_off = w * h + pads[y & 0x01];
-            v_off = 5 * w_4 * h + pads[y & 0x01] + 1;
-
-            line[0] = src_left[y_off];
-            line[1] = src_left[u_off];
-            line[2] = src_left[y_off + 3];
-            line[3] = src_left[v_off];
-
-            line[w] = src_right[y_off];
-            line[w + 1] = src_right[u_off];
-            line[w + 2] = src_right[y_off + 3];
-            line[w + 3] = src_right[v_off];
-
-            line += 4;
-        }
-    }
-}
-
-static double _test_3d(int count,
-                    enum yuv_format sf,
-                    char *src,
-                    enum yuv_format df,
-                    char *dst,
-                    unsigned int w,
-                    unsigned int h,
-                    char *inpath,
-                    char *outpath) {
+static double 
+_test_3d(int count,
+        enum yuv_format sf,
+        char *src,
+        enum yuv_format df,
+        char *dst,
+        unsigned int w,
+        unsigned int h,
+        char *inpath,
+        char *outpath) {
     double elapsed = 0.0f;
     time_now start, end;
     
@@ -266,9 +237,6 @@ int main(int argc, char **argv)
 
         elapsed = _test(count, sf, src, df, dst, w, h, filepath, "uyvy422_bottom.yuv", i420_to_uyvy422_bottom);
         printf("i420_to_uyvy_bottom> elapsed=%fms, avg=%fms\n", elapsed, elapsed / count);
-
-        elapsed = _test(count, sf, src, df, dst, w, h, filepath, "uyvy422_bottom_err.yuv", i420_to_uyvy422_err);
-        printf("i420_to_uyvy_err> elapsed=%fms, avg=%fms\n", elapsed, elapsed / count);
     } else {    	
         printf("fopen(%s) failed\n", filepath);
         goto exit;

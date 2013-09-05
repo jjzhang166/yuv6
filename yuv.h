@@ -20,7 +20,6 @@ void uyvy422_to_i420_wh(const char *src, char *dst, unsigned int w, unsigned int
 void i420_to_uyvy422(const char *src, char *dst, unsigned int w, unsigned int h);
 void i420_to_uyvy422_bottom(const char *src, char *dst, unsigned int w, unsigned int h);
 
-void i420_to_uyvy422_err(const char *src, char *dst, unsigned int w, unsigned int h);
 void i420_scale(const char *src, char *dst, unsigned int w, unsigned int h, float scale);
 
 void i420_3d_to_yuyv422_sbs(const char *src_left, const char *src_right, char *dst, unsigned int w, unsigned int h);

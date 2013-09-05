@@ -29,7 +29,8 @@
 /*
  * 4 bytes loop way
  */
-void uyvy422_to_i420_4byte(const char *src, char *dst, unsigned int w, unsigned int h)
+void
+uyvy422_to_i420_4byte(const char *src, char *dst, unsigned int w, unsigned int h)
 {
     char *dst_y = dst;
     char *dst_u = dst_y + w * h;
@@ -56,7 +57,8 @@ void uyvy422_to_i420_4byte(const char *src, char *dst, unsigned int w, unsigned 
 /*
  * w and h loop way
  */
-void uyvy422_to_i420_wh(const char *src, char *dst, unsigned int w, unsigned int h)
+void
+uyvy422_to_i420_wh(const char *src, char *dst, unsigned int w, unsigned int h)
 {
     char *dst_y = dst;
     char *dst_u = dst_y + w * h;
@@ -80,7 +82,8 @@ void uyvy422_to_i420_wh(const char *src, char *dst, unsigned int w, unsigned int
     }
 }
 
-void i420_to_uyvy422(const char *src, char *dst, unsigned int w, unsigned int h)
+void
+i420_to_uyvy422(const char *src, char *dst, unsigned int w, unsigned int h)
 {
     char *src_y = (char *) src;
     char *src_u = src_y + w * h;
@@ -110,7 +113,8 @@ void i420_to_uyvy422(const char *src, char *dst, unsigned int w, unsigned int h)
     }
 }
 
-void i420_to_uyvy422_bottom(const char *src, char *dst, unsigned int w, unsigned int h)
+void
+i420_to_uyvy422_bottom(const char *src, char *dst, unsigned int w, unsigned int h)
 {
     char *src_y = (char *) src;
     char *src_u = src_y + w * h;
@@ -134,37 +138,8 @@ void i420_to_uyvy422_bottom(const char *src, char *dst, unsigned int w, unsigned
     }
 }
 
-void i420_to_uyvy422_err(const char *src, char *dst, unsigned int w, unsigned int h)
-{
-    char *src_y = (char *) src;
-    char *src_u = src_y + w * h;
-    char *src_v = src_u + w * h / 4;
-    char *dst_line0;
-    char *dst_end = dst + uyvy_size(w, h);
-    unsigned int i, j;
-
-    dst_line0 = dst;
-    for (i = 0; i < h; i++) {
-        dst_line0 = dst_end - uyvy_size(w, 1);
-        for (j = 0; j < w; j++) {
-            if ((i & 0x01) == 0) {
-                if ((j & 0x01) == 0)
-                    *dst_line0++ = *src_u++;
-                else
-                    *dst_line0++ = *src_v;
-                *dst_line0++ = *src_y++;
-            } else {
-                if ((j & 0x01) == 0)
-                    *dst_line0++ = *src_v++;
-                else
-                    *dst_line0++ = *src_u;
-                *dst_line0++ = *src_y++;
-            }
-        }
-    }
-}
-
-void i420_scale(const char *src, char *dst, unsigned int w, unsigned int h, float scale)
+void
+i420_scale(const char *src, char *dst, unsigned int w, unsigned int h, float scale)
 {
     char *src_y, *src_u, *src_v;
     char *dst_y = dst;
@@ -190,11 +165,12 @@ void i420_scale(const char *src, char *dst, unsigned int w, unsigned int h, floa
     }
 }
 
-void i420_3d_to_yuyv422_sbs(const char *src_left,
-                            const char *src_right,
-                            char *dst,
-                            unsigned int w,
-                            unsigned int h)
+void
+i420_3d_to_yuyv422_sbs(const char *src_left,
+                        const char *src_right,
+                        char *dst,
+                        unsigned int w,
+                        unsigned int h)
 {
     unsigned int x, y, y_off, u_off, v_off;
     unsigned int w_4 = w >> 2;
